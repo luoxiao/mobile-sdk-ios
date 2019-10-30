@@ -11,7 +11,7 @@ class CrowdinLocalizationDownloader: CrowdinDownloaderProtocol {
     // swiftlint:disable implicitly_unwrapped_optional
     var completion: CrowdinDownloaderCompletion!
     
-    fileprivate let operationQueue = OperationQueue()
+    fileprivate var operationQueue = OperationQueue()
     fileprivate var strings: [String: String]? = nil
     fileprivate var plurals: [AnyHashable: Any]? = nil
     fileprivate var errors: [Error]? = nil
@@ -23,7 +23,10 @@ class CrowdinLocalizationDownloader: CrowdinDownloaderProtocol {
     }
     
     func download(strings: [String], plurals: [String], with hash: String, for localization: String, completion: @escaping CrowdinDownloaderCompletion) {
+        print("downloading - \(localization)")
         operationQueue.cancelAllOperations()
+        operationQueue = OperationQueue()
+        operationQueue.maxConcurrentOperationCount = 1
         self.contentDeliveryAPI = CrowdinContentDeliveryAPI(hash: hash, enterprise: enterprise, session: URLSession.init(configuration: .ephemeral))
 		self.strings = nil
 		self.plurals = nil
@@ -31,6 +34,7 @@ class CrowdinLocalizationDownloader: CrowdinDownloaderProtocol {
 		
         self.completion = completion
         let completionBlock = BlockOperation {
+            print("self.completion(self.strings, self.plurals, self.errors) - \(localization)")
             self.completion(self.strings, self.plurals, self.errors)
         }
         
@@ -76,5 +80,9 @@ class CrowdinLocalizationDownloader: CrowdinDownloaderProtocol {
             operationQueue.addOperation(download)
         }
         operationQueue.addOperation(completionBlock)
+    }
+    
+    deinit {
+        print("deinit")
     }
 }

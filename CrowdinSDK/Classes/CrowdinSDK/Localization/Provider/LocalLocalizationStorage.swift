@@ -9,6 +9,8 @@ import Foundation
 
 /// Protocol for local storage for localization data.
 protocol LocalLocalizationStorageProtocol: LocalizationStorageProtocol {
+    /// Current localization.
+    var localization: String { get set }
     /// List of all available localizations.
     var localizations: [String] { get set }
     /// Strings localization files content.
@@ -87,9 +89,9 @@ class LocalLocalizationStorage: LocalLocalizationStorageProtocol {
         }
     }
     
-    func fetchData(completion: LocalizationStorageCompletion) {
+    func fetchData(for localization: String, completion: LocalizationStorageCompletion) {
         self.fetchData()
-        completion(self.localizations, self.strings, self.plurals)
+        completion(localization, self.localizations, self.strings, self.plurals)
     }
     
     func saveLocalization() {

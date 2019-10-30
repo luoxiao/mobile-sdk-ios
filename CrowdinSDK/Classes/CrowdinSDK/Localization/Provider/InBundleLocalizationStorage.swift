@@ -20,9 +20,10 @@ class InBundleLocalizationStorage: RemoteLocalizationStorageProtocol {
     var strings: [String: String] = [:]
     var plurals: [AnyHashable: Any] = [:]
     
-    func fetchData(completion: @escaping LocalizationStorageCompletion) {
-        self.refresh()
-        completion(localizations, strings, plurals)
+    func fetchData(for localization: String, completion: @escaping LocalizationStorageCompletion) {
+        self.localization = localization
+        
+        completion(localization, localizations, strings, plurals)
     }
     
     convenience init(additionalWord: String, localization: String) {

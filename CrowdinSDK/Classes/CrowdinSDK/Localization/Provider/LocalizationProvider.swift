@@ -32,7 +32,6 @@ class LocalizationProvider: NSObject, LocalizationProviderProtocol {
     var localization: String {
         didSet {
             self.localStorage.localization = localization
-            self.remoteStorage.localization = localization
             self.refreshLocalization()
         }
     }
@@ -82,15 +81,18 @@ class LocalizationProvider: NSObject, LocalizationProviderProtocol {
     // Private method
     func loadLocalLocalization() {
         self.localStorage.localization = localization
-        self.localStorage.fetchData { localizations, strings, plurals in
+        self.localStorage.fetchData(for: localization) { localization, localizations, strings, plurals in
             self.setup(with: localizations, strings: strings, plurals: plurals)
         }
     }
     
     func fetchRemoteLocalization() {
-        self.remoteStorage.localization = localization
-        self.remoteStorage.fetchData { [weak self] localizations, strings, plurals in
+        self.remoteStorage.fetchData(for: localization) { [weak self] localization, localizations, strings, plurals in
             guard let self = self else { return }
+            if self.localization != "en" && strings?["test_key"] == "test_value [C]" {
+                
+            }
+            
             self.setup(with: localizations, strings: strings, plurals: plurals)
         }
     }
@@ -118,7 +120,7 @@ class LocalizationProvider: NSObject, LocalizationProviderProtocol {
     func setupPluralsBundle() {
 		self.pluralsBundle?.remove()
 		pluralsFolder.directories.forEach({ try? $0.remove() })
-        let localizationFolderName = localStorage.localization + String.minus + UUID().uuidString
+        let localizationFolderName = localization + String.minus + UUID().uuidString
         self.pluralsBundle = DictionaryBundle(path: pluralsFolder.path + String.pathDelimiter + localizationFolderName, fileName: Strings.LocalizableStringsdict.rawValue, dictionary: self.plurals)
     }
     // Setup strings

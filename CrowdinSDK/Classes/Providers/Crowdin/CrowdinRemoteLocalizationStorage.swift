@@ -16,7 +16,6 @@ extension Notification.Name {
 }
 
 class CrowdinRemoteLocalizationStorage: RemoteLocalizationStorageProtocol {
-    var localization: String
     var localizations: [String]
     var hashString: String
     var stringsFileNames: [String]
@@ -25,17 +24,15 @@ class CrowdinRemoteLocalizationStorage: RemoteLocalizationStorageProtocol {
     
     private let crowdinDownloader: CrowdinDownloaderProtocol
     
-    init(localization: String, config: CrowdinProviderConfig, enterprise: Bool) {
+    init(config: CrowdinProviderConfig, enterprise: Bool) {
         self.hashString = config.hashString
         self.stringsFileNames = config.stringsFileNames
         self.pluralsFileNames = config.pluralsFileNames
-        self.localization = localization
         self.localizations = config.localizations
         self.crowdinDownloader = CrowdinLocalizationDownloader(enterprise: enterprise)
     }
     
-    required init(localization: String, enterprise: Bool) {
-        self.localization = localization
+    required init(enterprise: Bool) {
         self.crowdinDownloader = CrowdinLocalizationDownloader(enterprise: enterprise)
         guard let hashString = Bundle.main.crowdinHash else {
             fatalError("Please add CrowdinHash key to your Info.plist file")
@@ -55,18 +52,20 @@ class CrowdinRemoteLocalizationStorage: RemoteLocalizationStorageProtocol {
         self.pluralsFileNames = crowdinPluralsFileNames
     }
     
-    func fetchData(completion: @escaping LocalizationStorageCompletion) {
-        self.crowdinDownloader.download(strings: stringsFileNames, plurals: pluralsFileNames, with: hashString, for: localization, completion: { [weak self] strings, plurals, errors in
+    func fetchData(for localization: String, completion: @escaping LocalizationStorageCompletion) {
+        self.crowdinDownloader.download(strings: stringsFileNames, plurals: pluralsFileNames, with: hashString, for: localization) { [weak self] strings, plurals, errors in
+        DispatchQueue.main.async {
             guard let self = self else { return }
-            completion(self.localizations, strings, plurals)
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(Notification(name: Notification.Name.CrowdinProviderDidDownloadLocalization))
-                
-                if let errors = errors {
-                    NotificationCenter.default.post(name: Notification.Name.CrowdinProviderDownloadError, object: errors)
+            completion(localization, self.localizations, strings, plurals)
+                if let currentLocalization = CrowdinSDK.currentLocalization, currentLocalization == localization {
+                    NotificationCenter.default.post(Notification(name: Notification.Name.CrowdinProviderDidDownloadLocalization))
+                    
+                    if let errors = errors {
+                        NotificationCenter.default.post(name: Notification.Name.CrowdinProviderDownloadError, object: errors)
+                    }
                 }
             }
-        })
+        }
     }
     
     /// Remove add stored E-Tag headers for every file.
