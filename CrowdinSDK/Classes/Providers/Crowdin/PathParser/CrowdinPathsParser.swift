@@ -25,14 +25,13 @@ fileprivate enum Paths: String {
             let languageCode = Locale(identifier: localization).languageCode!
             return enLocale.localizedString(forLanguageCode: languageCode) ?? .empty
         case .locale:
-            let localeWithUnderscore = Locale(identifier: localization).identifier
-            return localeWithUnderscore.replacingOccurrences(of: "_", with: "-")
+            return Locale(identifier: localization).identifier.replacingOccurrences(of: "_", with: "-")
         case .localeWithUnderscore:
-            return Locale.current.identifier
+            return Locale(identifier: localization).identifier.replacingOccurrences(of: "-", with: "_")
         case .osxCode:
-            return Bundle.main.preferredLanguage + FileType.lproj.extension
+            return Locale(identifier: localization).identifier + FileType.lproj.extension
         case .osxLocale:
-            return Bundle.main.preferredLanguage
+            return Locale(identifier: localization).identifier
         }
     }
 }

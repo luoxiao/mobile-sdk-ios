@@ -22,7 +22,7 @@ Pod::Spec.new do |spec|
   DESC
   
   spec.homepage         = 'https://github.com/Serhii Londar/CrowdinSDK'
-  spec.license          = { :type => 'MIT', :file => 'LICENSE.md' }
+  spec.license          = { :type => 'MIT', :file => 'LICENSE' }
   spec.author           = { 'Serhii Londar' => 'serhii.londar@gmail.com' }
   spec.source           = { :git => 'https://github.com/Serhii Londar/CrowdinSDK.git', :tag => spec.version.to_s }
   spec.social_media_url    = 'https://twitter.com/serhii_londar'
@@ -60,8 +60,6 @@ Pod::Spec.new do |spec|
     provider.dependency 'CrowdinSDK/CrowdinAPI'
   end
   
-  
-
   spec.test_spec 'CrowdinProvider_Tests' do |test_spec|
     test_spec.source_files = 'CrowdinSDK/Tests/CrowdinProvider/*.swift'
   end
@@ -69,8 +67,12 @@ Pod::Spec.new do |spec|
   spec.subspec 'CrowdinAPI' do |subspec|
     subspec.name = 'CrowdinAPI'
     subspec.source_files = 'CrowdinSDK/Classes/CrowdinAPI/**/*'
-    subspec.dependency 'Starscream'
+    subspec.dependency 'Starscream', '3.0.6'
     subspec.dependency 'CrowdinSDK/Login'
+  end
+  
+  spec.test_spec 'CrowdinAPI_Tests' do |test_spec|
+    test_spec.source_files = 'CrowdinSDK/Tests/CrowdinAPI/*.swift'
   end
   
   spec.subspec 'Mapping' do |mapping|
@@ -103,6 +105,9 @@ Pod::Spec.new do |spec|
     feature.source_files = 'CrowdinSDK/Classes/Features/LoginFeature/**/*.swift'
   end
   
+#  spec.test_spec 'Login_Tests' do |test_spec|
+#    test_spec.source_files = 'CrowdinSDK/Tests/Login/*.swift'
+#  end
   
   spec.subspec 'IntervalUpdate' do |feature|
     feature.name = 'IntervalUpdate'

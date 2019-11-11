@@ -6,7 +6,7 @@
   "homepage": "https://github.com/Serhii Londar/CrowdinSDK",
   "license": {
     "type": "MIT",
-    "file": "LICENSE.md"
+    "file": "LICENSE"
   },
   "authors": {
     "Serhii Londar": "serhii.londar@gmail.com"
@@ -36,6 +36,11 @@
       "name": "CrowdinProvider_Tests",
       "test_type": "unit",
       "source_files": "CrowdinSDK/Tests/CrowdinProvider/*.swift"
+    },
+    {
+      "name": "CrowdinAPI_Tests",
+      "test_type": "unit",
+      "source_files": "CrowdinSDK/Tests/CrowdinAPI/*.swift"
     }
   ],
   "subspecs": [
@@ -75,7 +80,7 @@
       "source_files": "CrowdinSDK/Classes/CrowdinAPI/**/*",
       "dependencies": {
         "Starscream": [
-
+          "3.0.6"
         ],
         "CrowdinSDK/Login": [
 

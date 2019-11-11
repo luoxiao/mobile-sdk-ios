@@ -14,8 +14,7 @@ class CrowdinTesterTests: XCTestCase {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
         let crowdinProviderConfig = CrowdinProviderConfig(hashString: "5290b1cfa1eb44bf2581e78106i",
-                                                          stringsFileNames: ["Localizable.strings", "Main.strings"],
-                                                          pluralsFileNames: ["Localizable.stringsdict"],
+                                                          files: ["Localizable.strings", "Main.strings", "Localizable.stringsdict"],
                                                           localizations: ["en", "de", "uk"],
                                                           sourceLanguage: "en")
         let crowdinSDKConfig = CrowdinSDKConfig.config().with(crowdinProviderConfig: crowdinProviderConfig)
@@ -58,5 +57,12 @@ class CrowdinTesterTests: XCTestCase {
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 60.0)
+    }
+	
+    func testNotExistingLocalizations() {
+
+		let tester = CrowdinTester(localization: "zh")
+		XCTAssert(tester.inSDKPluralsKeys.count == 0, "Localization contains 0 plural keys as it is not exist")
+		XCTAssert(tester.inSDKStringsKeys.count == 0, "Localization contains 0 string keys as it is not exist")
     }
 }

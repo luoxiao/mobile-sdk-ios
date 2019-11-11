@@ -22,17 +22,8 @@ class CrowdinRemoteLocalizationStorage: RemoteLocalizationStorageProtocol {
     var stringsFileNames: [String]
     var pluralsFileNames: [String]
     var name: String = "Crowdin"
-    
-    private let crowdinDownloader: CrowdinDownloaderProtocol
-    
-    init(hashString: String, stringsFileNames: [String], pluralsFileNames: [String], localization: String, localizations: [String], enterprise: Bool) {
-        self.hashString = hashString
-        self.stringsFileNames = stringsFileNames
-        self.pluralsFileNames = pluralsFileNames
-        self.localization = localization
-        self.localizations = localizations
-        self.crowdinDownloader = CrowdinLocalizationDownloader(enterprise: enterprise)
-    }
+    var enterprise: Bool
+    private var crowdinDownloader: CrowdinDownloaderProtocol
     
     init(localization: String, config: CrowdinProviderConfig, enterprise: Bool) {
         self.hashString = config.hashString
@@ -41,11 +32,13 @@ class CrowdinRemoteLocalizationStorage: RemoteLocalizationStorageProtocol {
         self.localization = localization
         self.localizations = config.localizations
         self.crowdinDownloader = CrowdinLocalizationDownloader(enterprise: enterprise)
+        self.enterprise = enterprise
     }
     
     required init(localization: String, enterprise: Bool) {
         self.localization = localization
         self.crowdinDownloader = CrowdinLocalizationDownloader(enterprise: enterprise)
+        self.enterprise = enterprise
         guard let hashString = Bundle.main.crowdinHash else {
             fatalError("Please add CrowdinHash key to your Info.plist file")
         }
@@ -54,17 +47,16 @@ class CrowdinRemoteLocalizationStorage: RemoteLocalizationStorageProtocol {
             fatalError("Please add CrowdinLocalizations key to your Info.plist file")
         }
         self.localizations = localizations
-        guard let crowdinStringsFileNames = Bundle.main.crowdinStringsFileNames else {
-            fatalError("Please add CrowdinStringsFileNames key to your Info.plist file")
+        
+        guard let crowdinFiles = Bundle.main.crowdinFiles else {
+            fatalError("Please add CrowdinFiles key to your Info.plist file")
         }
-        self.stringsFileNames = crowdinStringsFileNames
-        guard let crowdinPluralsFileNames = Bundle.main.crowdinPluralsFileNames else {
-            fatalError("Please add CrowdinPluralsFileNames key to your Info.plist file")
-        }
-        self.pluralsFileNames = crowdinPluralsFileNames
+        self.stringsFileNames = crowdinFiles.filter({ $0.isStrings })
+        self.pluralsFileNames = crowdinFiles.filter({ $0.isStringsDict })
     }
     
     func fetchData(completion: @escaping LocalizationStorageCompletion) {
+        self.crowdinDownloader = CrowdinLocalizationDownloader(enterprise: self.enterprise)
         self.crowdinDownloader.download(strings: stringsFileNames, plurals: pluralsFileNames, with: hashString, for: localization, completion: { [weak self] strings, plurals, errors in
             guard let self = self else { return }
             completion(self.localizations, strings, plurals)
